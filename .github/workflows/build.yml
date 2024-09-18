@@ -28,15 +28,13 @@ jobs:
         sudo apt-get update
         sudo apt-get install libx11-dev libvulkan-dev -y
 
-    - name: Install GCC-5 or Clang-3.6
+    - name: Install GCC or Clang
       run: |
         if [ "${{ matrix.compiler }}" == "gcc" ]; then
-          sudo apt-get install g++-5 gcc-5 -y;
-          export CXX=g++-5 CC=gcc-5;
+          sudo apt-get install gcc g++ -y
         fi
         if [ "${{ matrix.compiler }}" == "clang" ]; then
-          sudo apt-get install clang-3.6 libstdc++-4.8-dev -y;
-          export CXX=clang++ CC=clang;
+          sudo apt-get install clang -y
         fi
 
     - name: Configure CMake
