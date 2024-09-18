@@ -1,0 +1,59 @@
+name: C++ Build
+
+on:
+  workflow_dispatch: # Allows manual trigger
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: false
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libx11-dev libvulkan-dev -y
+
+    - name: Install GCC-5 or Clang-3.6
+      run: |
+        if [ "${{ matrix.compiler }}" == "gcc" ]; then
+          sudo apt-get install g++-5 gcc-5 -y;
+          export CXX=g++-5 CC=gcc-5;
+        fi
+        if [ "${{ matrix.compiler }}" == "clang" ]; then
+          sudo apt-get install clang-3.6 libstdc++-4.8-dev -y;
+          export CXX=clang++ CC=clang;
+        fi
+
+    - name: Configure CMake
+      run: cmake -DTARGET_LINUX=ON -DCMAKE_INSTALL_PREFIX=install_dir .
+
+    - name: Build
+      run: make -j4
+
+    - name: Install
+      run: make install
+
+    - name: Create Tarball
+      run: |
+        tar czvf build-output.tar.gz install_dir/
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: build-output.tar.gz
